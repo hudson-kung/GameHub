@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-label="Speed Tap gameplay screenshot">
+  <rect width="900" height="520" fill="#fff"/>
+  <rect x="0" y="0" width="900" height="92" fill="#111"/>
+  <text x="42" y="58" fill="#fff" font-family="Arial, sans-serif" font-size="34" font-weight="800">Speed Tap</text>
+  <text x="682" y="58" fill="#fff" font-family="Arial, sans-serif" font-size="24" font-weight="700">Time: 09</text>
+  <text x="42" y="140" fill="#111" font-family="Arial, sans-serif" font-size="34" font-weight="800">Score: 42</text>
+  <circle cx="450" cy="296" r="150" fill="#ffbf47" stroke="#111" stroke-width="8"/>
+  <circle cx="400" cy="240" r="44" fill="#fff" opacity=".55"/>
+  <text x="450" y="326" text-anchor="middle" fill="#111" font-family="Arial, sans-serif" font-size="86" font-weight="900">TAP</text>
+  <g fill="none" stroke="#111" stroke-width="8" stroke-linecap="round" opacity=".28">
+    <path d="M202 280h72"/>
+    <path d="M626 280h72"/>
+    <path d="M450 74v72"/>
+    <path d="M450 446v40"/>
+    <path d="M285 132l50 50"/>
+    <path d="M615 132l-50 50"/>
+  </g>
+</svg>

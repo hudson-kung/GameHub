@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Hub</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark">GH</span>
+          <div>
+            <h1>Game Hub</h1>
+            <p>Choose your next run.</p>
+          </div>
+        </div>
+        <button class="home-button active" id="homeButton">Home</button>
+      </header>
+
+      <section class="stage">
+        <header class="stage-header">
+          <div>
+            <p class="eyebrow" id="gameType">Puzzle</p>
+            <h2 id="gameTitle">Water Sort</h2>
+          </div>
+          <div class="score-strip">
+            <span id="statOne">Moves: 0</span>
+            <span id="statTwo">Best: --</span>
+          </div>
+        </header>
+
+        <section class="game-panel" id="gamePanel" aria-live="polite"></section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
