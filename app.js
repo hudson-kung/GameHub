@@ -298,10 +298,11 @@ function renderWaterSort() {
   const best = getBest("water") || "--";
   const config = getWaterLevelConfig(state.water.level);
   const rowConfig = getWaterRowConfig(state.water.tubes.length);
+  const levelHelp = `${config.colorCount} colors, ${config.colorCount + config.emptyCount} bottles${config.colorCount + config.emptyCount > 10 ? " across multiple rows" : ""}. ${config.nextBottleLevel ? `Next bottle at level ${config.nextBottleLevel}.` : "Bottle cap reached."} Best moves: ${best}`;
 
   panel.innerHTML = `
     ${makeToolbar(
-      `${config.colorCount} colors, ${config.colorCount + config.emptyCount} bottles${config.colorCount + config.emptyCount > 10 ? " across multiple rows" : ""}. ${config.nextBottleLevel ? `Next bottle at level ${config.nextBottleLevel}.` : "Bottle cap reached."} Best moves: ${best}`,
+      levelHelp,
       `<span>Level ${state.water.level}</span><span>${state.water.moves} moves</span><span>Best ${best}</span>`,
       `<label class="level-jump">Level <input id="waterLevelInput" type="number" min="1" value="${state.water.level}" /></label><button class="btn primary" id="newWater">Restart Level</button><button class="btn" id="prevWater">Prev Level</button><button class="btn" id="nextWater">Next Level</button><button class="btn" id="undoWater">Undo</button>`,
     )}
@@ -361,8 +362,15 @@ function getWaterRowConfig(tubeCount) {
   const rows = Math.ceil(tubeCount / cols);
   const baseWidth = cols * 104 + (cols - 1) * 18;
   const baseHeight = rows * 260 + (rows - 1) * 18;
-  const scaleX = Math.min(1, 1680 / baseWidth);
-  const scaleY = Math.min(1, 360 / baseHeight);
+  const viewport = window.visualViewport || window;
+  const viewportWidth = viewport.width || window.innerWidth || 1200;
+  const viewportHeight = viewport.height || window.innerHeight || 800;
+  const isPhone = viewportWidth <= 560;
+  const isTablet = viewportWidth <= 820;
+  const availableWidth = Math.max(260, viewportWidth - (isPhone ? 28 : isTablet ? 44 : 120));
+  const availableHeight = Math.max(210, viewportHeight - (isPhone ? 245 : isTablet ? 285 : 320));
+  const scaleX = Math.min(1, availableWidth / baseWidth);
+  const scaleY = Math.min(1, availableHeight / baseHeight);
   const scale = Math.max(0.18, Math.min(scaleX, scaleY));
   return {
     cols,
@@ -501,5 +509,11 @@ function clearWaterAnimation(shouldRender = true) {
     }
   }, 280);
 }
+
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderWaterSort, 120);
+});
 
 renderActiveGame();
