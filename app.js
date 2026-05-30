@@ -9,6 +9,7 @@ const state = {
     message: "",
     animating: null,
     animationType: "",
+    levelCleared: false,
   },
 };
 
@@ -31,7 +32,7 @@ const palette = [
   "#27ae60",
 ];
 
-const maxWaterBottles = 40;
+const maxWaterBottles = 10;
 const waterProgressKey = "game-hub-water-progress";
 const panel = document.querySelector("#gamePanel");
 
@@ -58,16 +59,10 @@ function renderActiveGame() {
 
 function makeToolbar() {
   return `
-    <div class="top-icons" aria-label="Game controls">
-      <button class="icon-btn" type="button" aria-label="Settings">⚙</button>
-      <button class="icon-btn grid-icon" type="button" aria-label="Levels">▦</button>
-      <button class="icon-btn gift" type="button" aria-label="Gift">🎁</button>
-      <button class="icon-btn" id="newWater" type="button" aria-label="Restart">↻</button>
-    </div>
     <div class="level-title">
       <span>LEVEL</span>
-      <input id="waterLevelInput" type="number" min="1" value="${state.water.level}" aria-label="Level" />
-      <button class="task-btn" type="button" aria-label="Tasks">☑</button>
+      <span>${state.water.level}</span>
+      <button class="restart-btn" id="newWater" type="button" aria-label="Restart level">Restart</button>
     </div>
   `;
 }
@@ -94,6 +89,13 @@ function loadWaterProgress() {
     if (!saved || !Array.isArray(saved.tubes) || !Array.isArray(saved.activeColors)) return;
 
     state.water.level = Math.max(1, Number(saved.level) || 1);
+    const config = getWaterLevelConfig(state.water.level);
+    const expectedTubeCount = config.colorCount + config.emptyCount;
+    if (saved.tubes.length !== expectedTubeCount || saved.tubes.length > maxWaterBottles) {
+      localStorage.removeItem(waterProgressKey);
+      return;
+    }
+
     state.water.moves = Math.max(0, Number(saved.moves) || 0);
     state.water.tubes = saved.tubes;
     state.water.activeColors = saved.activeColors;
@@ -102,6 +104,7 @@ function loadWaterProgress() {
     state.water.history = [];
     state.water.animating = null;
     state.water.animationType = "";
+    state.water.levelCleared = false;
   } catch {
     localStorage.removeItem(waterProgressKey);
   }
@@ -117,6 +120,7 @@ function resetWater() {
   state.water.message = `Level ${state.water.level}. Pick a tube to start pouring.`;
   state.water.animating = null;
   state.water.animationType = "";
+  state.water.levelCleared = false;
   saveWaterProgress();
 }
 
@@ -143,13 +147,12 @@ function cloneTubes(tubes) {
 
 function getWaterLevelConfig(level) {
   const totalBottles = Math.min(5 + getWaterExtraBottles(level), maxWaterBottles);
-  const emptyCount = totalBottles >= 13 ? 4 : totalBottles >= 8 ? 3 : 2;
+  const emptyCount = 2;
   const colorCount = totalBottles - emptyCount;
   return {
     colorCount,
     emptyCount,
     capacity: 4,
-    nextBottleLevel: getNextWaterBottleLevel(level),
   };
 }
 
@@ -165,20 +168,6 @@ function getWaterExtraBottles(level) {
   }
 
   return extraBottles;
-}
-
-function getNextWaterBottleLevel(level) {
-  let extraBottles = 0;
-  let nextLevel = 10;
-  let gap = 10;
-
-  while (level >= nextLevel && extraBottles < maxWaterBottles - 5) {
-    extraBottles += 1;
-    gap += 10;
-    nextLevel += gap;
-  }
-
-  return extraBottles >= maxWaterBottles - 5 ? null : nextLevel;
 }
 
 function generateWaterPuzzle(config) {
@@ -320,35 +309,11 @@ function renderWaterSort() {
         </div>
       </div>
     </div>
-    <p class="water-message">${state.water.message}</p>
-    <div class="bottom-tools">
-      <button class="oval-btn" id="undoWater" type="button">← 480</button>
-      <button class="oval-btn" id="restartWaterBottom" type="button">↻ 9</button>
-      <button class="oval-btn" id="hintWater" type="button">💡 5</button>
-    </div>
     <div id="waterResult"></div>
   `;
 
   document.querySelector("#newWater").addEventListener("click", () => {
     resetWater();
-    renderWaterSort();
-  });
-  document.querySelector("#waterLevelInput").addEventListener("change", (event) => {
-    jumpToWaterLevel(event.target.value);
-  });
-  document.querySelector("#waterLevelInput").addEventListener("keydown", (event) => {
-    if (event.key === "Enter") jumpToWaterLevel(event.target.value);
-  });
-  document.querySelector("#restartWaterBottom").addEventListener("click", () => {
-    resetWater();
-    renderWaterSort();
-  });
-  document.querySelector("#hintWater").addEventListener("click", () => {
-    state.water.message = "Try freeing a matching color into an empty bottle.";
-    updateWaterBoardState();
-  });
-  document.querySelector("#undoWater").addEventListener("click", () => {
-    undoWaterMove();
     renderWaterSort();
   });
   panel.querySelectorAll(".tube").forEach((tube) => {
@@ -358,7 +323,7 @@ function renderWaterSort() {
 }
 
 function getWaterRowConfig(tubeCount) {
-  const cols = Math.min(tubeCount, 7);
+  const cols = Math.min(tubeCount, 5);
   const rows = Math.ceil(tubeCount / cols);
   const baseWidth = cols * 48 + (cols - 1) * 12;
   const baseHeight = rows * 142 + (rows - 1) * 38;
@@ -381,13 +346,6 @@ function getWaterRowConfig(tubeCount) {
     scaledWidth: baseWidth * scale,
     scaledHeight: baseHeight * scale,
   };
-}
-
-function jumpToWaterLevel(value) {
-  const level = Math.max(1, Number.parseInt(value, 10) || 1);
-  state.water.level = level;
-  resetWater();
-  renderWaterSort();
 }
 
 function handleTubeClick(index) {
@@ -460,42 +418,24 @@ function updateWaterBoardState() {
 function showWaterWin() {
   const solved = isSolvedTubes(state.water.tubes, getWaterLevelConfig(state.water.level).capacity);
 
-  if (solved) {
+  if (solved && !state.water.levelCleared) {
+    state.water.levelCleared = true;
     setBest("water", state.water.moves, true);
+    saveWaterProgress();
     document.querySelector("#waterResult").innerHTML = `
       <div class="result">
         <h3>Level ${state.water.level} cleared in ${state.water.moves} moves</h3>
         <p>Next level adds pressure with more bottles and colors.</p>
-        <button class="oval-btn" id="clearNextWater">Play Level ${state.water.level + 1}</button>
       </div>
     `;
-    const clearNext = document.querySelector("#clearNextWater");
-    if (clearNext) {
-      clearNext.addEventListener("click", () => {
-        state.water.level += 1;
-        resetWater();
-        renderWaterSort();
-      });
-    }
+    setTimeout(() => {
+      state.water.level += 1;
+      resetWater();
+      renderWaterSort();
+    }, 900);
   }
 
   return solved;
-}
-
-function undoWaterMove() {
-  const previous = state.water.history.pop();
-  if (!previous) {
-    state.water.message = "No move to undo yet.";
-    return;
-  }
-
-  state.water.tubes = previous;
-  state.water.moves = Math.max(0, state.water.moves - 1);
-  state.water.selected = null;
-  state.water.message = "Last pour undone.";
-  state.water.animating = null;
-  state.water.animationType = "";
-  saveWaterProgress();
 }
 
 function clearWaterAnimation(shouldRender = true) {
