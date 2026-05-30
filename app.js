@@ -61,7 +61,6 @@ function makeToolbar() {
     <div class="top-icons" aria-label="Game controls">
       <button class="icon-btn" type="button" aria-label="Settings">⚙</button>
       <button class="icon-btn grid-icon" type="button" aria-label="Levels">▦</button>
-      <button class="icon-btn no-ad" type="button" aria-label="No ads">AD</button>
       <button class="icon-btn gift" type="button" aria-label="Gift">🎁</button>
       <button class="icon-btn" id="newWater" type="button" aria-label="Restart">↻</button>
     </div>
@@ -327,14 +326,6 @@ function renderWaterSort() {
       <button class="oval-btn" id="restartWaterBottom" type="button">↻ 9</button>
       <button class="oval-btn" id="hintWater" type="button">💡 5</button>
     </div>
-    <div class="ad-strip">
-      <div class="ad-thumb">AD</div>
-      <div>
-        <strong>MonopolyGo!</strong>
-        <span>Roll the dice and get rich in MONOPOL...</span>
-      </div>
-      <button type="button" aria-label="Close ad">×</button>
-    </div>
     <div id="waterResult"></div>
   `;
 
@@ -377,7 +368,7 @@ function getWaterRowConfig(tubeCount) {
   const isPhone = viewportWidth <= 560;
   const isTablet = viewportWidth <= 820;
   const availableWidth = Math.max(260, Math.min(390, viewportWidth) - 34);
-  const availableHeight = Math.max(245, viewportHeight - (isPhone ? 300 : isTablet ? 330 : 350));
+  const availableHeight = Math.max(245, viewportHeight - (isPhone ? 220 : isTablet ? 250 : 280));
   const scaleX = Math.min(1, availableWidth / baseWidth);
   const scaleY = Math.min(1, availableHeight / baseHeight);
   const scale = Math.max(0.18, Math.min(scaleX, scaleY));

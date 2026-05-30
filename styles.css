@@ -42,6 +42,7 @@ input {
 }
 
 .stage {
+  position: relative;
   width: min(100vw, 390px);
   height: 100dvh;
   min-height: 0;
@@ -56,20 +57,20 @@ input {
 
 .game-panel {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: max(0.75rem, env(safe-area-inset-top)) 1rem max(0.45rem, env(safe-area-inset-bottom));
+  padding: max(0.45rem, env(safe-area-inset-top)) 1rem max(0.45rem, env(safe-area-inset-bottom));
   overflow: hidden;
 }
 
 .top-icons {
   display: grid;
-  grid-template-columns: 1fr 1fr 2fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 2fr 1fr;
   align-items: center;
   gap: 0.35rem;
-  margin: 0.1rem 0 1.15rem;
+  margin: 0 0 0.65rem;
 }
 
 .icon-btn,
@@ -90,18 +91,6 @@ input {
   font-size: 1.75rem;
 }
 
-.no-ad {
-  justify-self: end;
-  width: 2.25rem;
-  height: 2.25rem;
-  color: #222;
-  border: 3px solid #d62828;
-  border-radius: 50%;
-  font-size: 0.9rem;
-  font-weight: 900;
-  transform: rotate(-15deg);
-}
-
 .gift {
   color: #d82323;
 }
@@ -112,7 +101,7 @@ input {
   justify-content: center;
   align-items: center;
   gap: 0.55rem;
-  margin-bottom: 1.75rem;
+  margin-bottom: 0.9rem;
   color: #070707;
   font-size: 1.55rem;
   letter-spacing: 0;
@@ -227,7 +216,7 @@ input {
 
 .water-message {
   min-height: 1.3rem;
-  margin: 0.35rem 0 0.65rem;
+  margin: 0.25rem 0 0.45rem;
   color: #514a44;
   text-align: center;
   font-size: 0.78rem;
@@ -253,59 +242,19 @@ input {
   font-weight: 900;
 }
 
-.ad-strip {
-  display: grid;
-  grid-template-columns: 4.2rem minmax(0, 1fr) 1.25rem;
-  align-items: center;
-  height: 3.1rem;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  border-radius: 4px;
-  font-size: 0.75rem;
-}
-
-.ad-thumb {
-  display: grid;
-  place-items: center;
-  height: 100%;
-  color: #ffffff;
-  background:
-    linear-gradient(135deg, rgba(68, 164, 255, 0.88), rgba(97, 205, 92, 0.88)),
-    #58b257;
-  font-size: 0.6rem;
-  font-weight: 900;
-}
-
-.ad-strip strong,
-.ad-strip span {
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ad-strip button {
-  width: 1.05rem;
-  height: 1.05rem;
-  padding: 0;
-  color: #ffffff;
-  background: #b8b8b8;
-  border: 0;
-  border-radius: 50%;
-  font-weight: 900;
-}
-
 .result {
-  position: fixed;
-  inset: auto 1rem 5rem;
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 4.7rem;
   z-index: 5;
-  padding: 1rem;
+  padding: 0.75rem;
   color: #111;
   text-align: center;
   background: rgba(255, 248, 226, 0.96);
   border: 2px solid #8a6f45;
   border-radius: 18px;
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 0, 0, 0.2);
 }
 
 .result h3,
@@ -353,7 +302,4 @@ input {
     margin-bottom: 0.3rem;
   }
 
-  .ad-strip {
-    height: 2.65rem;
-  }
 }
