@@ -56,14 +56,19 @@ function renderActiveGame() {
   renderWaterSort();
 }
 
-function makeToolbar(help, stats, actions) {
+function makeToolbar() {
   return `
-    <div class="toolbar">
-      <div class="toolbar-info">
-        <p class="help-text">${help}</p>
-        <div class="stat-cluster">${stats}</div>
-      </div>
-      <div class="actions">${actions}</div>
+    <div class="top-icons" aria-label="Game controls">
+      <button class="icon-btn" type="button" aria-label="Settings">⚙</button>
+      <button class="icon-btn grid-icon" type="button" aria-label="Levels">▦</button>
+      <button class="icon-btn no-ad" type="button" aria-label="No ads">AD</button>
+      <button class="icon-btn gift" type="button" aria-label="Gift">🎁</button>
+      <button class="icon-btn" id="newWater" type="button" aria-label="Restart">↻</button>
+    </div>
+    <div class="level-title">
+      <span>LEVEL</span>
+      <input id="waterLevelInput" type="number" min="1" value="${state.water.level}" aria-label="Level" />
+      <button class="task-btn" type="button" aria-label="Tasks">☑</button>
     </div>
   `;
 }
@@ -298,14 +303,9 @@ function renderWaterSort() {
   const best = getBest("water") || "--";
   const config = getWaterLevelConfig(state.water.level);
   const rowConfig = getWaterRowConfig(state.water.tubes.length);
-  const levelHelp = `${config.colorCount} colors, ${config.colorCount + config.emptyCount} bottles${config.colorCount + config.emptyCount > 10 ? " across multiple rows" : ""}. ${config.nextBottleLevel ? `Next bottle at level ${config.nextBottleLevel}.` : "Bottle cap reached."} Best moves: ${best}`;
 
   panel.innerHTML = `
-    ${makeToolbar(
-      levelHelp,
-      `<span>Level ${state.water.level}</span><span>${state.water.moves} moves</span><span>Best ${best}</span>`,
-      `<label class="level-jump">Level <input id="waterLevelInput" type="number" min="1" value="${state.water.level}" /></label><button class="btn primary" id="newWater">Restart Level</button><button class="btn" id="prevWater">Prev Level</button><button class="btn" id="nextWater">Next Level</button><button class="btn" id="undoWater">Undo</button>`,
-    )}
+    ${makeToolbar()}
     <div class="water-board ${rowConfig.rows === 1 ? "single-row" : ""}">
       <div class="water-scale" style="--board-cols: ${rowConfig.cols}; --board-rows: ${rowConfig.rows}; --board-scale: ${rowConfig.scale}; --board-width: ${rowConfig.width}px; --board-height: ${rowConfig.height}px; --scaled-width: ${rowConfig.scaledWidth}px; --scaled-height: ${rowConfig.scaledHeight}px">
         <div class="water-grid">
@@ -322,6 +322,19 @@ function renderWaterSort() {
       </div>
     </div>
     <p class="water-message">${state.water.message}</p>
+    <div class="bottom-tools">
+      <button class="oval-btn" id="undoWater" type="button">← 480</button>
+      <button class="oval-btn" id="restartWaterBottom" type="button">↻ 9</button>
+      <button class="oval-btn" id="hintWater" type="button">💡 5</button>
+    </div>
+    <div class="ad-strip">
+      <div class="ad-thumb">AD</div>
+      <div>
+        <strong>MonopolyGo!</strong>
+        <span>Roll the dice and get rich in MONOPOL...</span>
+      </div>
+      <button type="button" aria-label="Close ad">×</button>
+    </div>
     <div id="waterResult"></div>
   `;
 
@@ -335,17 +348,13 @@ function renderWaterSort() {
   document.querySelector("#waterLevelInput").addEventListener("keydown", (event) => {
     if (event.key === "Enter") jumpToWaterLevel(event.target.value);
   });
-  document.querySelector("#prevWater").addEventListener("click", () => {
-    state.water.level = Math.max(1, state.water.level - 1);
-    localStorage.setItem("game-hub-water-level", String(state.water.level));
+  document.querySelector("#restartWaterBottom").addEventListener("click", () => {
     resetWater();
     renderWaterSort();
   });
-  document.querySelector("#nextWater").addEventListener("click", () => {
-    state.water.level += 1;
-    localStorage.setItem("game-hub-water-level", String(state.water.level));
-    resetWater();
-    renderWaterSort();
+  document.querySelector("#hintWater").addEventListener("click", () => {
+    state.water.message = "Try freeing a matching color into an empty bottle.";
+    updateWaterBoardState();
   });
   document.querySelector("#undoWater").addEventListener("click", () => {
     undoWaterMove();
@@ -358,17 +367,17 @@ function renderWaterSort() {
 }
 
 function getWaterRowConfig(tubeCount) {
-  const cols = tubeCount <= 10 ? tubeCount : Math.min(tubeCount, Math.ceil(Math.sqrt(tubeCount * 2.6)));
+  const cols = Math.min(tubeCount, 7);
   const rows = Math.ceil(tubeCount / cols);
-  const baseWidth = cols * 104 + (cols - 1) * 18;
-  const baseHeight = rows * 260 + (rows - 1) * 18;
+  const baseWidth = cols * 48 + (cols - 1) * 12;
+  const baseHeight = rows * 142 + (rows - 1) * 38;
   const viewport = window.visualViewport || window;
   const viewportWidth = viewport.width || window.innerWidth || 1200;
   const viewportHeight = viewport.height || window.innerHeight || 800;
   const isPhone = viewportWidth <= 560;
   const isTablet = viewportWidth <= 820;
-  const availableWidth = Math.max(260, viewportWidth - (isPhone ? 28 : isTablet ? 44 : 120));
-  const availableHeight = Math.max(210, viewportHeight - (isPhone ? 245 : isTablet ? 285 : 320));
+  const availableWidth = Math.max(260, Math.min(390, viewportWidth) - 34);
+  const availableHeight = Math.max(245, viewportHeight - (isPhone ? 300 : isTablet ? 330 : 350));
   const scaleX = Math.min(1, availableWidth / baseWidth);
   const scaleY = Math.min(1, availableHeight / baseHeight);
   const scale = Math.max(0.18, Math.min(scaleX, scaleY));
@@ -466,7 +475,7 @@ function showWaterWin() {
       <div class="result">
         <h3>Level ${state.water.level} cleared in ${state.water.moves} moves</h3>
         <p>Next level adds pressure with more bottles and colors.</p>
-        <button class="btn primary" id="clearNextWater">Play Level ${state.water.level + 1}</button>
+        <button class="oval-btn" id="clearNextWater">Play Level ${state.water.level + 1}</button>
       </div>
     `;
     const clearNext = document.querySelector("#clearNextWater");
